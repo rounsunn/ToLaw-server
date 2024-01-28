@@ -136,12 +136,27 @@ export const getSearchResults = async (req: Request, res: Response) => {
       query = {
         $or: [
           {
-            name: {
+            fullName: {
               $regex: new RegExp("^" + param, "i"),
             },
           },
           {
             lawArea: {
+              $regex: new RegExp("^" + param, "i"),
+            },
+          },
+          {
+            languages: {
+              $regex: new RegExp(param.split(',').map(lang => `\\b${lang.trim()}\\b`).join('|'), 'i'),
+            },
+          },
+          {
+            barCouncilNumber: {
+              $regex: new RegExp("^" + param, "i"),
+            },
+          },
+          {
+            region: {
               $regex: new RegExp("^" + param, "i"),
             },
           },

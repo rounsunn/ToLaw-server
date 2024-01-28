@@ -138,12 +138,27 @@ const getSearchResults = (req, res) => __awaiter(void 0, void 0, void 0, functio
             query = {
                 $or: [
                     {
-                        name: {
+                        fullName: {
                             $regex: new RegExp("^" + param, "i"),
                         },
                     },
                     {
                         lawArea: {
+                            $regex: new RegExp("^" + param, "i"),
+                        },
+                    },
+                    {
+                        languages: {
+                            $regex: new RegExp(param.split(',').map(lang => `\\b${lang.trim()}\\b`).join('|'), 'i'),
+                        },
+                    },
+                    {
+                        barCouncilNumber: {
+                            $regex: new RegExp("^" + param, "i"),
+                        },
+                    },
+                    {
+                        region: {
                             $regex: new RegExp("^" + param, "i"),
                         },
                     },
