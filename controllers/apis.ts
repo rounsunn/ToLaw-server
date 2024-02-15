@@ -5,6 +5,11 @@ import userSchema from "../models/userSchema.js";
 import lawyerSchema from "../models/lawyerSchema.js";
 import { generateUploadURL } from "./s3.js";
 import { BookAppintment } from "./send_emails.js";
+import RazorPay from "razorpay";
+import crypto from "crypto";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = express.Router();
 
@@ -245,5 +250,58 @@ export const SendEmails = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Failed to send confirmation emails' });
   }
 }
+
+export const PayByRazorPay = async (req: Request, res: Response) => {
+  try {
+    const razorpay = new RazorPay({
+      key_id: process.env.RAZOR_KEY ?? "",
+      key_secret: process.env.RAZOR_SECRET ?? "",
+    });
+
+    const options = req.body;
+    const order = await razorpay.orders.create(options);
+
+    if (!order) {
+      return res.status(500).send("Error");
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error");
+  }
+};
+
+export const ValidatePayByRazorPay = async (req: Request, res: Response) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    if (process.env.RAZOR_SECRET) {
+      const generatedSignature = crypto
+        .createHmac("sha256", process.env.RAZOR_SECRET)
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest("hex");
+
+      if (generatedSignature === razorpay_signature) {
+        res.json({ success: true, message: "Payment successful" });
+      } else {
+        res
+          .status(400)
+          .json({ success: false, message: "Invalid payment signature" });
+      }
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Razorpay secret key is not defined",
+      });
+    }
+  } catch (error) {
+    console.error("Error during Razorpay payment validation:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Payment validation unsuccessful" });
+  }
+};
 
 export default router;

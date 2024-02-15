@@ -17,7 +17,9 @@ import {
   deleteUser,
   getSearchResults,
   UploadProfilePic,
-  SendEmails
+  SendEmails,
+  PayByRazorPay,
+  ValidatePayByRazorPay,
 } from "./controllers/apis.js";
 
 dotenv.config();
@@ -52,3 +54,5 @@ app.get("/search", getSearchResults);
 // app.get("/search/area", getAreaSearchResults);
 app.get("/s3Url", UploadProfilePic);
 app.post("/sendemails", SendEmails);
+app.post("/order", PayByRazorPay);
+app.post("/order/validate", ValidatePayByRazorPay);
