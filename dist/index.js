@@ -36,3 +36,5 @@ app.get("/search", apis_js_1.getSearchResults);
 // app.get("/search/area", getAreaSearchResults);
 app.get("/s3Url", apis_js_1.UploadProfilePic);
 app.post("/sendemails", apis_js_1.SendEmails);
+app.post("/order", apis_js_1.PayByRazorPay);
+app.post("/order/validate", apis_js_1.ValidatePayByRazorPay);

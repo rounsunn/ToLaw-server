@@ -12,13 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SendEmails = exports.UploadProfilePic = exports.getSearchResults = exports.deleteLawyer = exports.deleteUser = exports.updateUser = exports.updateLawyer = exports.getUser = exports.getLawyer = exports.getUsers = exports.getLawyers = exports.createLawyer = exports.createUser = void 0;
+exports.ValidatePayByRazorPay = exports.PayByRazorPay = exports.SendEmails = exports.UploadProfilePic = exports.getSearchResults = exports.deleteLawyer = exports.deleteUser = exports.updateUser = exports.updateLawyer = exports.getUser = exports.getLawyer = exports.getUsers = exports.getLawyers = exports.createLawyer = exports.createUser = void 0;
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const userSchema_js_1 = __importDefault(require("../models/userSchema.js"));
 const lawyerSchema_js_1 = __importDefault(require("../models/lawyerSchema.js"));
 const s3_js_1 = require("./s3.js");
 const send_emails_js_1 = require("./send_emails.js");
+const razorpay_1 = __importDefault(require("razorpay"));
+const crypto_1 = __importDefault(require("crypto"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const router = express_1.default.Router();
 // create new User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -242,4 +246,56 @@ const SendEmails = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.SendEmails = SendEmails;
+const PayByRazorPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c;
+    try {
+        const razorpay = new razorpay_1.default({
+            key_id: (_b = process.env.RAZOR_KEY) !== null && _b !== void 0 ? _b : "",
+            key_secret: (_c = process.env.RAZOR_SECRET) !== null && _c !== void 0 ? _c : "",
+        });
+        const options = req.body;
+        const order = yield razorpay.orders.create(options);
+        if (!order) {
+            return res.status(500).send("Error");
+        }
+        res.json(order);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send("Error");
+    }
+});
+exports.PayByRazorPay = PayByRazorPay;
+const ValidatePayByRazorPay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        if (process.env.RAZOR_SECRET) {
+            const generatedSignature = crypto_1.default
+                .createHmac("sha256", process.env.RAZOR_SECRET)
+                .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+                .digest("hex");
+            if (generatedSignature === razorpay_signature) {
+                res.json({ success: true, message: "Payment successful" });
+            }
+            else {
+                res
+                    .status(400)
+                    .json({ success: false, message: "Invalid payment signature" });
+            }
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                message: "Razorpay secret key is not defined",
+            });
+        }
+    }
+    catch (error) {
+        console.error("Error during Razorpay payment validation:", error);
+        res
+            .status(500)
+            .json({ success: false, message: "Payment validation unsuccessful" });
+    }
+});
+exports.ValidatePayByRazorPay = ValidatePayByRazorPay;
 exports.default = router;
