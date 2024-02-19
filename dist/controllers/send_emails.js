@@ -32,7 +32,7 @@ const BookAppintment = (userEmail, lawyerEmail, selectedDateTime) => __awaiter(v
         text: `An appointment has been scheduled on ${formattedDateTime}. 
 We will send you a confirmation email with the meeting link 10 minutes before the scheduled meeting. 
 
-Thank you for booking an appointment with CoLawab.`,
+Thank you for booking an appointment with Tolaw.`,
         cc: lawyerEmail,
     };
     try {
