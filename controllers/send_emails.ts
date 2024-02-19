@@ -21,7 +21,7 @@ export const BookAppintment = async (userEmail: string, lawyerEmail: string, sel
     text: `An appointment has been scheduled on ${formattedDateTime}. 
 We will send you a confirmation email with the meeting link 10 minutes before the scheduled meeting. 
 
-Thank you for booking an appointment with Tolaw.`,
+Thank you for booking an appointment with CoLawab.`,
     cc: lawyerEmail,
   };
 
