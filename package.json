@@ -1,7 +1,7 @@
 {
-  "name": "colawab-backend",
+  "name": "ToLaw-backend",
   "version": "1.0.0",
-  "description": "This is the backend for CoLawab platform - stores lawyers data, templates data",
+  "description": "This is the backend for ToLaw platform - stores lawyers data, templates data",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
